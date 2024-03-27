@@ -1,0 +1,35 @@
+name: Process Dispatch Event
+
+on:
+  repository_dispatch:
+    types: [test]
+
+jobs:
+  process_event:
+    name: Process Dispatch Event
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Display Dispatch Event Data
+        run: |
+          echo "Received dispatch event with payload message:"
+          echo "${{ github.event.client_payload.message }}"
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.13
+      
+      - name: Install dependencies
+        run: pip3 install -r requirements.txt
+
+      - name: Run Python script
+        env:
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          NOTION_DB_ID: ${{ secrets.NOTION_DB_ID }}
+          BLOG_URL: ${{ github.event.client_payload.url }}
+          BLOG_TAG: ${{ github.event.client_payload.tag }}
+        run: python3 notion-test.py
